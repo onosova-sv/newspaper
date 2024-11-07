@@ -12,7 +12,11 @@ class Author(models.Model):
 
 
     def update_rating(self):
-        pass
+        post_rating = sum(dct['rank_post'] for dct in Post.objects.filter(author=self).values('rank_post')) // 3
+        author_comm = sum(dct['rank_comment'] for dct in Comment.objects.filter(user=self.user).values('rank_comment'))
+        comm_under_posts = sum(dct['rank_comment'] for dct in Comment.objects.filter(post__author=self).values('rank_comment'))
+        return post_rating + author_comm + comm_under_posts
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -37,15 +41,18 @@ class Post(models.Model):
     category = models.ManyToManyField(Category, through='PostCategory')
 
     def like(self):
-        rank_post = self.rank_post + 1
-        return rank_post
+        self.rank_post += 1
+        self.save()
 
     def dislike(self):
-        self.rank_post = self.rank_post - 1
-        return self.rank_post
+        self.rank_post -= 1
+        self.save()
 
     def preview(self):
-        return self.text_post[:123] + '...'
+        if len(self.text_post)<=124:
+            return self.text_post
+        else:
+            return self.text_post[:123] + '...'
 
 class PostCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -59,9 +66,9 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def like(self):
-        rank_comment = self.rank_comment + 1
-        return rank_comment
+        self.rank_comment += 1
+        self.save()
 
     def dislike(self):
-        rank_comment = self.rank_comment - 1
-        return rank_comment
+        self.rank_comment -= 1
+        self.save()
