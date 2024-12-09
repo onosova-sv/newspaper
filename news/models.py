@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.urls import reverse
 
 class User(models.Model):
     name = models.CharField(max_length=64)
@@ -57,6 +58,8 @@ class Post(models.Model):
         else:
             return self.text_post[:123] + '...'
 
+    def get_absolute_url(self):
+        return reverse('news_detail', args=[str(self.id)])
 
 
 class PostCategory(models.Model):
