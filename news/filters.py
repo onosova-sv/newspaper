@@ -5,7 +5,7 @@ import django_filters
 # FilterSet, который мы наследуем,
 # должен чем-то напомнить знакомые вам Django дженерики.
 class NewsFilter(django_filters.FilterSet):
-   time_in = django_filters.DateFilter(widget = django_filters.widgets.DateInput(attrs={'type': 'date'}))
+
    class Meta:
        # В Meta классе мы должны указать Django модель,
        # в которой будем фильтровать записи.

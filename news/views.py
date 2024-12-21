@@ -1,12 +1,16 @@
 from django.shortcuts import render
-from datetime import datetime
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
 from .filters import NewsFilter
 from .forms import PostForm
 
+class AddPost(PermissionRequiredMixin, CreateView):
+    permission_required = ('news.add_post')
 
+class EditPost(PermissionRequiredMixin, UpdateView):
+    permission_required = ('news.change_post')
 class NewsList(ListView):
     # Указываем модель, объекты которой мы будем выводить
     model = Post
@@ -63,7 +67,7 @@ class NewsCreate(CreateView):
         post.position = 'news'
         return super().form_valid(form)
 
-class NewsUpdate(UpdateView):
+class NewsUpdate(UpdateView, LoginRequiredMixin):
     form_class = PostForm
     model = Post
     template_name = 'news_edit.html'
