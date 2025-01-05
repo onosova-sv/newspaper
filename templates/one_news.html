@@ -12,4 +12,9 @@ one_news
 <h2>{{one_news.head}}</h2>
 <h3>{{one_news.time_in|date:'d M Y'}}</h3>
 <h3>{{one_news.text_post}}</h3>
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Подписаться на категорию!" />
+</form>
 {% endblock content %}

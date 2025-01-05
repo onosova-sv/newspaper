@@ -1,9 +1,7 @@
 from django.db import models
 from datetime import datetime
 from django.urls import reverse
-
-class User(models.Model):
-    name = models.CharField(max_length=64)
+from django.contrib.auth.models import User
 
 class Author(models.Model):
     full_name = models.CharField(max_length=64)
@@ -21,6 +19,17 @@ class Author(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    user = models.ManyToManyField(User, through = 'UsersSubscribed')
+
+    def __str__(self):
+        return f'{self.name}'
+
+class UsersSubscribed(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    category = models.ForeignKey(Category, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user} is subscribed to category {self.category}'
 
 news = 'NW'
 article = 'AR'
