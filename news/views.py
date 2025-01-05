@@ -138,8 +138,10 @@ def create_news(request):
         text_post = request.POST['text_post']
         category_id = request.POST['category']
         category = Category.objects.get(id=category_id)
+        post_id = request.POST['post']
+        post = Category.objects.get(id=post_id)
 
-        news = Post(head=head, text_post=text_post, category=category, author=request.user)
+        news = Post(head=head, text_post=text_post, category=category, author=request.user, post = post)
         try:
             news.full_clean()  # вызывает проверку, включая check для лимита
             news.save()
@@ -149,7 +151,7 @@ def create_news(request):
             for subscriber in subscribers:
                 send_mail(
                     'Новая новость в вашей категории!',
-                    f'Новая новость:\\n\\n{Post.head}\\n{Post.text_post}',
+                    f'Новая новость:\\n\\n{Post.head}\\n{Post.text_post[:30]}...\nПодробнее: http://127.0.0.1:8000/posts/{Post.post_id}',
                     'onosova.sweta@yandex.ru',  # ваш адрес
                     [subscriber.user.email],
                     fail_silently=False,

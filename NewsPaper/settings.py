@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django_filters',
     'sign',
-
+    'django_apscheduler',
     'protect',
     'allauth',
     'allauth.account',
@@ -53,6 +53,9 @@ INSTALLED_APPS = [
 ]
 DEFAULT_FROM_EMAIL = ''  # здесь указываем уже свою ПОЛНУЮ почту, с которой будут отправляться письма
 SITE_ID = 1
+
+APSHEDULER_DATETIME_FORMAT='N j, Y, f:s a'
+APSHEDULER_RUN_NOW_TIMEOUT=25
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
