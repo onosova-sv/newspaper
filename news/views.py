@@ -1,14 +1,11 @@
-from django.shortcuts import render, reverse, redirect
+from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
-from .models import Post, UsersSubscribed, Category
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Post
 from .filters import NewsFilter
 from .forms import PostForm
-from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
-from django.contrib import messages
-from django.utils import timezone
+
 
 class AddPost(PermissionRequiredMixin, CreateView):
     permission_required = ('news.add_post')
@@ -128,38 +125,3 @@ class ArticleDelete(DeleteView):
 def get(self,request,*args, **kwargs):
     return render(request, 'make_post.html', {})
 
-def clean(self):
-    post_count_today = Post.objects.filter(author=self.author, created_at__date=timezone.now().date()).count()
-    if post_count_today >= 3:
-        raise ValidationError("Вы не можете опубликовать более 3 новостей в сутки.")
-def create_news(request):
-    if request.method == 'POST':
-        head = request.POST['head']
-        text_post = request.POST['text_post']
-        category_id = request.POST['category']
-        category = Category.objects.get(id=category_id)
-        post_id = request.POST['post']
-        post = Category.objects.get(id=post_id)
-
-        news = Post(head=head, text_post=text_post, category=category, author=request.user, post = post)
-        try:
-            news.full_clean()  # вызывает проверку, включая check для лимита
-            news.save()
-
-                # Уведомление подписчиков
-            subscribers = UsersSubscribed.objects.filter(category=category)
-            for subscriber in subscribers:
-                send_mail(
-                    'Новая новость в вашей категории!',
-                    f'Новая новость:\\n\\n{Post.head}\\n{Post.text_post[:30]}...\nПодробнее: http://127.0.0.1:8000/posts/{Post.post_id}',
-                    'onosova.sweta@yandex.ru',  # ваш адрес
-                    [subscriber.user.email],
-                    fail_silently=False,
-                )
-
-            messages.success(request, "Новость успешно создана и подписчики уведомлены!")
-            return redirect('post_list')
-        except ValidationError as e:
-            messages.error(request, str(e))
-
-    return render(request, 'post_created.html')
