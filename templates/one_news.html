@@ -2,9 +2,12 @@
 {% extends 'flatpages/default.html' %}
 
 <!-- Название у нас будет Product -->
-{% block title %}
-one_news
-{% endblock title %}
+{%load cache%}
+    {%cache 60 title%}
+        {% block title %}
+        one_news
+        {% endblock title %}
+    {%endcache%}
 
 <!-- В контенте на странице мы выводим сам товар, идентификатор которого был передан в url -->
 {% block content %}

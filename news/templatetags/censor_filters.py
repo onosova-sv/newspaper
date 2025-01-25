@@ -7,13 +7,13 @@ register = template.Library()
 BAD_WORDS = ["хрен", "ахрененно", "жопа"]
 
 @register.filter(name='censor')
+
 def censor(text):
-    """Заменяет нецензурные слова на звездочки (*)"""
-    if not isinstance(text, str):
-        return text
-
-    # Создание регулярного выражения
-    bad_words_regex = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b', re.IGNORECASE)
-
-    # Замена обнаруженных нецензурных слов на звездочки
-    return bad_words_regex.sub(lambda x: '*' * len(x.group()), text)
+    words = text.split()
+    result = []
+    for word in words:
+        if word in BAD_WORDS:
+            result.append(word[0] + "*"*(len(word)-2) + word[-1])
+        else:
+            result.append(word)
+    return " ".join(result)

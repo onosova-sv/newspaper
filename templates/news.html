@@ -3,9 +3,12 @@
 {%load censor_filters%}
 {%load custom_tags%}
 
-{% block title %}
-News
-{% endblock title %}
+{%load cache%}
+    {%cache 60 title%}
+        {% block title %}
+        News
+        {% endblock title %}
+    {%endcache%}
 
 {% block content %}
    <h1>Все новости</h1>
