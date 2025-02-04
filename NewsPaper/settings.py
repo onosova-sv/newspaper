@@ -188,3 +188,108 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+import os
+import logging
+from django.utils.log import DEFAULT_LOGGING
+
+DEBUG = True  # Или False, в зависимости от вашего окружения
+
+# Создаем директорию для хранения логов (если необходимо)
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# Форматы для вывода логов
+console_format = '%(asctime)s - %(levelname)s - %(message)s'
+file_general_format = '%(asctime)s - %(levelname)s - %(module)s - %(message)s'
+file_errors_format = '%(asctime)s - %(levelname)s - %(message)s - %(pathname)s - %(exc_info)s'
+file_security_format = '%(asctime)s - %(levelname)s - %(module)s - %(message)s'
+
+# Конфигурация логирования
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': console_format,
+        },
+        'file_general': {
+            'format': file_general_format,
+        },
+        'file_errors': {
+            'format': file_errors_format,
+        },
+        'file_security': {
+            'format': file_security_format,
+        },
+    },
+    'filters': {
+        'debug_filter': {
+            '()': 'django.utils.log.ServerErrorFilter',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+            'filters': ['debug_filter'],  # Фильтр для консоли
+        },
+        'file_general': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'general.log'),
+            'formatter': 'file_general',
+        },
+        'file_errors': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'errors.log'),
+            'formatter': 'file_errors',
+        },
+        'file_security': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'security.log'),
+            'formatter': 'file_security',
+        },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'file_errors',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file_general'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins', 'file_errors'],
+            'level': 'ERROR' if not DEBUG else 'DEBUG',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['mail_admins', 'file_errors'],
+            'level': 'ERROR' if not DEBUG else 'DEBUG',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['file_security'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+# Фильтр для консоли, чтобы выводить сообщения только в DEBUG режиме
+if DEBUG:
+    LOGGING['handlers']['console']['filters'] = []
+else:
+    LOGGING['handlers']['console']['filters'] = ['debug_filter']
